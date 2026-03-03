@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#000!important;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BackRoad — Social Without the Sickness · BlackRoad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg,#FF8400,#FF4400,#FF0066,#CC00AA,#8800FF,#0066FF,#2233CC);
+      --b:    rgba(255,255,255,0.07);
+      --b2:   rgba(255,255,255,0.04);
+      --surf: rgba(255,255,255,0.025);
+      --hov:  rgba(255,255,255,0.04);
+      --warm: rgba(255,132,0,0.06);
+      --orange:#FF8400; --pink:#FF0066; --purple:#8800FF; --blue:#0066FF; --red:#FF4400;
+    }
+
+    html,body { background:#000!important; color:#fff!important; font-family:'JetBrains Mono',monospace; height:100%; overflow:hidden; }
+
+    .shell { display:grid; grid-template-rows:3px 46px 1fr; height:100vh; }
+    .grad-rule { background:var(--grad); }
+
+    /* ── TOPBAR ── */
+    .topbar { display:flex; align-items:center; border-bottom:1px solid var(--b); background:#000; }
+    .tb-logo { padding:0 20px; height:100%; display:flex; align-items:center; gap:12px; border-right:1px solid var(--b); }
+    .tb-logo-name { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; letter-spacing:-0.01em; }
+    .tb-logo-sub  { font-size:0.4rem; opacity:0.22; letter-spacing:0.12em; text-transform:uppercase; }
+    .tb-tabs { display:flex; height:100%; }
+    .tb-tab { padding:0 18px; height:100%; display:flex; align-items:center; gap:7px; font-size:0.48rem; opacity:0.28; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; border-right:1px solid var(--b); transition:opacity 0.15s,background 0.15s; }
+    .tb-tab:hover { opacity:0.65; background:var(--hov); }
+    .tb-tab.active { opacity:1; background:var(--surf); border-bottom:2px solid var(--orange); }
+    .tb-tab-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+
+    .tb-right { margin-left:auto; display:flex; align-items:center; height:100%; }
+    .tb-right-item { padding:0 16px; height:100%; border-left:1px solid var(--b); display:flex; align-items:center; gap:8px; font-size:0.44rem; opacity:0.3; }
+    .tb-right-item.highlight { opacity:0.6; }
+    .tb-avatar { width:24px; height:24px; border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:0.5rem; font-weight:700; border-radius:50%; }
+    .tb-depth { display:flex; align-items:center; gap:6px; }
+    .td-label { font-size:0.4rem; opacity:0.5; letter-spacing:0.1em; }
+    .td-score { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; color:var(--orange); opacity:1; }
+    .td-bar { width:40px; height:2px; background:rgba(255,255,255,0.07); }
+    .td-fill { height:100%; background:var(--orange); }
+
+    /* ── BODY ── */
+    .body { display:grid; grid-template-columns:280px 1fr 320px; overflow:hidden; }
+
+    /* ── LEFT: Personal feed sidebar ── */
+    .left-panel { border-right:1px solid var(--b); display:flex; flex-direction:column; overflow:hidden; }
+
+    .lp-profile { padding:16px; border-bottom:1px solid var(--b); flex-shrink:0; }
+    .lp-prof-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .lp-avatar { width:36px; height:36px; border:1px solid rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:700; flex-shrink:0; }
+    .lp-name { font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:700; }
+    .lp-handle { font-size:0.42rem; opacity:0.3; margin-top:2px; }
+    .lp-no-metrics { font-size:0.44rem; opacity:0.25; line-height:1.7; padding:8px 10px; border:1px solid var(--b); border-left:2px solid var(--orange); background:var(--warm); }
+
+    .lp-section { flex-shrink:0; }
+    .lp-section-label { padding:10px 16px 6px; font-size:0.4rem; opacity:0.18; letter-spacing:0.16em; text-transform:uppercase; border-bottom:1px solid var(--b2); }
+
+    .campfire-list { flex-shrink:0; }
+    .cf-item { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--b2); cursor:pointer; transition:background 0.12s; }
+    .cf-item:hover { background:var(--hov); }
+    .cf-item.active { background:var(--warm); border-left:2px solid var(--orange); }
+    .cf-fire { font-size:0.8rem; flex-shrink:0; }
+    .cf-info { flex:1; min-width:0; }
+    .cf-name { font-size:0.54rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cf-meta { font-size:0.42rem; opacity:0.3; margin-top:2px; }
+    .cf-time { font-size:0.4rem; opacity:0.2; flex-shrink:0; }
+    @keyframes cf-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .cf-live { width:6px; height:6px; border-radius:50%; background:var(--orange); flex-shrink:0; animation:cf-pulse 2s ease-in-out infinite; }
+
+    .plans-list { flex-shrink:0; }
+    .plan-item { display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--b2); cursor:pointer; transition:background 0.12s; }
+    .plan-item:hover { background:var(--hov); }
+    .plan-icon { font-size:0.7rem; flex-shrink:0; }
+    .plan-info { flex:1; }
+    .plan-name { font-size:0.52rem; font-weight:700; }
+    .plan-meta { font-size:0.42rem; opacity:0.3; margin-top:2px; }
+    .plan-pill { font-size:0.38rem; padding:2px 7px; border:1px solid; letter-spacing:0.06em; flex-shrink:0; }
+    .plan-pill.rsvp  { border-color:rgba(0,102,255,0.4); color:var(--blue); }
+    .plan-pill.maybe { border-color:rgba(255,132,0,0.4); color:var(--orange); }
+    .plan-pill.new   { border-color:rgba(255,255,255,0.2); opacity:0.4; }
+
+    .lp-scroll { flex:1; overflow-y:auto; }
+    .lp-scroll::-webkit-scrollbar { width:2px; }
+    .lp-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    .connection-item { display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--b2); cursor:pointer; transition:background 0.12s; }
+    .connection-item:hover { background:var(--hov); }
+    .conn-avatar { width:26px; height:26px; border-radius:50%; border:1px solid var(--b); display:flex; align-items:center; justify-content:center; font-size:0.5rem; font-weight:700; flex-shrink:0; }
+    .conn-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    .conn-name { font-size:0.5rem; font-weight:700; flex:1; }
+    .conn-depth { font-size:0.42rem; opacity:0.3; }
+
+    /* ── MAIN: Feed ── */
+    .feed-wrap { display:flex; flex-direction:column; overflow:hidden; }
+
+    .feed-header { padding:12px 24px; border-bottom:1px solid var(--b); display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    .fh-title { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; flex:1; }
+    .fh-sort { display:flex; gap:0; }
+    .sort-btn { font-family:'JetBrains Mono',monospace; font-size:0.42rem; padding:5px 10px; border:1px solid var(--b); background:transparent; color:#fff; opacity:0.3; cursor:pointer; letter-spacing:0.06em; transition:opacity 0.12s,background 0.12s; }
+    .sort-btn:first-child { border-right:none; }
+    .sort-btn.active { opacity:0.8; background:var(--surf); }
+    .fh-delay-notice { font-size:0.42rem; opacity:0.25; display:flex; align-items:center; gap:6px; }
+    .fh-clock { font-family:'Space Grotesk',sans-serif; font-size:0.7rem; font-weight:700; color:var(--orange); opacity:0.8; }
+
+    .compose-box { padding:16px 24px; border-bottom:1px solid var(--b); flex-shrink:0; }
+    .compose-inner { border:1px solid var(--b); background:var(--surf); transition:border-color 0.15s; }
+    .compose-inner:focus-within { border-color:rgba(255,255,255,0.2); }
+    .compose-ta { width:100%; font-family:'JetBrains Mono',monospace; font-size:0.56rem; color:#fff; background:transparent; border:none; outline:none; padding:14px 14px 8px; resize:none; line-height:1.75; min-height:68px; }
+    .compose-ta::placeholder { color:rgba(255,255,255,0.14); }
+    .compose-footer { display:flex; align-items:center; padding:8px 14px; border-top:1px solid var(--b2); gap:10px; }
+    .compose-delay { font-size:0.42rem; opacity:0.3; flex:1; display:flex; align-items:center; gap:6px; }
+    .cd-toggle { display:flex; gap:0; }
+    .cd-opt { font-size:0.4rem; padding:3px 8px; border:1px solid var(--b); cursor:pointer; opacity:0.35; transition:opacity 0.12s; }
+    .cd-opt.on { opacity:0.8; background:rgba(255,132,0,0.1); border-color:rgba(255,132,0,0.3); color:var(--orange); }
+    .compose-post { font-family:'JetBrains Mono',monospace; font-size:0.5rem; font-weight:700; padding:7px 16px; background:#fff; color:#000; border:none; cursor:pointer; transition:opacity 0.15s; }
+    .compose-post:hover { opacity:0.88; }
+
+    .feed-scroll { flex:1; overflow-y:auto; }
+    .feed-scroll::-webkit-scrollbar { width:2px; }
+    .feed-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    /* ── POST CARD ── */
+    .post-card { padding:20px 24px; border-bottom:1px solid var(--b); cursor:pointer; transition:background 0.12s; }
+    .post-card:hover { background:var(--hov); }
+    .post-card.selected { background:var(--surf); border-left:3px solid var(--orange); }
+
+    .pc-head { display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; }
+    .pc-avatar { width:32px; height:32px; border-radius:50%; border:1px solid var(--b); display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700; flex-shrink:0; }
+    .pc-meta { flex:1; }
+    .pc-name { font-size:0.58rem; font-weight:700; }
+    .pc-time { font-size:0.42rem; opacity:0.25; margin-top:2px; display:flex; align-items:center; gap:6px; }
+    .pc-delayed { font-size:0.38rem; padding:1px 5px; border:1px solid rgba(255,132,0,0.3); color:var(--orange); opacity:0.7; letter-spacing:0.06em; }
+    .pc-depth-badge { margin-left:auto; text-align:right; }
+    .pdb-label { font-size:0.38rem; opacity:0.2; letter-spacing:0.1em; text-transform:uppercase; }
+    .pdb-score { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700; color:var(--orange); line-height:1; }
+
+    .pc-body { font-size:0.58rem; opacity:0.7; line-height:1.85; margin-bottom:14px; }
+    .pc-body strong { color:#fff; opacity:1; font-family:'Space Grotesk',sans-serif; }
+
+    .pc-footer { display:flex; align-items:center; gap:10px; }
+    .pc-tag { font-size:0.4rem; padding:2px 7px; border:1px solid var(--b); opacity:0.3; letter-spacing:0.05em; }
+    .pc-reply-count { margin-left:auto; font-size:0.42rem; opacity:0.25; display:flex; align-items:center; gap:5px; }
+
+    /* depth bar */
+    .depth-bar { height:2px; margin-bottom:12px; background:rgba(255,255,255,0.04); }
+    .depth-fill { height:100%; transition:width 0.6s; }
+
+    /* campfire banner */
+    .campfire-banner { margin:16px 24px; border:1px solid rgba(255,132,0,0.2); background:rgba(255,132,0,0.04); padding:14px 16px; }
+    .cb-head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .cb-fire { font-size:1rem; }
+    .cb-name { font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:700; }
+    .cb-timer { margin-left:auto; font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:700; color:var(--orange); }
+    .cb-timer-label { font-size:0.38rem; opacity:0.2; letter-spacing:0.1em; }
+    .cb-desc { font-size:0.5rem; opacity:0.45; line-height:1.75; margin-bottom:10px; }
+    .cb-members { display:flex; gap:-4px; align-items:center; }
+    .cb-av { width:18px; height:18px; border-radius:50%; border:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:0.38rem; font-weight:700; margin-left:-4px; }
+    .cb-av:first-child { margin-left:0; }
+    .cb-count { font-size:0.44rem; opacity:0.35; margin-left:8px; }
+    .cb-join { font-family:'JetBrains Mono',monospace; font-size:0.48rem; font-weight:700; padding:7px 16px; border:1px solid rgba(255,132,0,0.4); color:var(--orange); background:transparent; cursor:pointer; margin-left:auto; transition:background 0.12s; letter-spacing:0.04em; }
+    .cb-join:hover { background:rgba(255,132,0,0.08); }
+
+    /* ── RIGHT: Conversation depth ── */
+    .right-panel { border-left:1px solid var(--b); display:flex; flex-direction:column; overflow:hidden; }
+
+    .rp-head { padding:12px 16px; border-bottom:1px solid var(--b); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .rp-accent { width:3px; height:10px; background:var(--orange); }
+    .rp-title { font-size:0.42rem; opacity:0.25; letter-spacing:0.14em; text-transform:uppercase; flex:1; }
+    .rp-badge { font-size:0.38rem; padding:2px 7px; border:1px solid rgba(255,132,0,0.35); color:var(--orange); letter-spacing:0.06em; }
+
+    /* depth meter */
+    .depth-meter { padding:16px; border-bottom:1px solid var(--b); flex-shrink:0; }
+    .dm-label { font-size:0.4rem; opacity:0.2; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:12px; }
+    .dm-rings { display:flex; justify-content:center; align-items:center; position:relative; height:80px; margin-bottom:12px; }
+    .dm-ring { border-radius:50%; border:1px solid; position:absolute; display:flex; align-items:center; justify-content:center; }
+    .dm-score-center { font-family:'Space Grotesk',sans-serif; font-size:1.6rem; font-weight:700; color:var(--orange); z-index:1; }
+    .dm-score-label { font-size:0.38rem; opacity:0.2; text-align:center; margin-top:2px; }
+    .dm-breakdown { display:flex; flex-direction:column; gap:5px; }
+    .dmb-row { display:flex; align-items:center; gap:8px; font-size:0.46rem; }
+    .dmb-label { opacity:0.3; flex:1; }
+    .dmb-bar-wrap { width:60px; height:2px; background:rgba(255,255,255,0.06); }
+    .dmb-bar { height:100%; background:var(--orange); }
+    .dmb-val { font-size:0.42rem; opacity:0.4; min-width:24px; text-align:right; }
+
+    /* thread view */
+    .thread-view { flex:1; overflow-y:auto; }
+    .thread-view::-webkit-scrollbar { width:2px; }
+    .thread-view::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); }
+
+    .thread-post { padding:14px 16px; border-bottom:1px solid var(--b2); }
+    .tp-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .tp-av { width:22px; height:22px; border-radius:50%; border:1px solid var(--b); display:flex; align-items:center; justify-content:center; font-size:0.42rem; font-weight:700; flex-shrink:0; }
+    .tp-name { font-size:0.5rem; font-weight:700; }
+    .tp-time { font-size:0.4rem; opacity:0.2; margin-left:auto; }
+    .tp-body { font-size:0.5rem; opacity:0.5; line-height:1.75; padding-left:30px; }
+    .tp-indent { margin-left:30px; padding-top:10px; padding-left:12px; border-left:1px solid var(--b2); }
+
+    /* no-metrics notice */
+    .no-metrics-badge { padding:10px 16px; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--b); flex-shrink:0; }
+    .nmb-inner { display:flex; align-items:flex-start; gap:8px; }
+    .nmb-dot { width:5px; height:5px; border-radius:50%; background:var(--orange); flex-shrink:0; margin-top:4px; }
+    .nmb-text { font-size:0.44rem; opacity:0.3; line-height:1.7; }
+
+    /* post composer full */
+    .rp-reply { padding:12px 16px; border-top:1px solid var(--b); flex-shrink:0; display:flex; gap:8px; align-items:flex-end; }
+    .rp-reply-inp { flex:1; font-family:'JetBrains Mono',monospace; font-size:0.5rem; color:#fff; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.1); outline:none; padding:6px 0; resize:none; line-height:1.65; max-height:80px; }
+    .rp-reply-inp::placeholder { color:rgba(255,255,255,0.13); }
+    .rp-reply-inp:focus { border-bottom-color:rgba(255,255,255,0.3); }
+    .rp-send { padding:8px 14px; background:#fff; color:#000; font-family:'JetBrains Mono',monospace; font-size:0.48rem; font-weight:700; border:none; cursor:pointer; flex-shrink:0; transition:opacity 0.15s; }
+    .rp-send:hover { opacity:0.88; }
+
+    * { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.06) transparent; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+    .post-card { animation:fadeUp 0.3s ease forwards; }
+    .post-card:nth-child(2) { animation-delay:0.04s; opacity:0; }
+    .post-card:nth-child(3) { animation-delay:0.08s; opacity:0; }
+    .post-card:nth-child(4) { animation-delay:0.12s; opacity:0; }
+    .post-card:nth-child(5) { animation-delay:0.16s; opacity:0; }
+  </style>
+</head>
+<body style="background:#000!important;color:#fff!important;">
+<div style="position:fixed;inset:0;background:#000;z-index:-9999;pointer-events:none;"></div>
+
+<div class="shell">
+  <div class="grad-rule"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">
+      <div>
+        <div class="tb-logo-name">BackRoad</div>
+        <div class="tb-logo-sub">social.blackroad.io</div>
+      </div>
+    </div>
+    <div class="tb-tabs">
+      <div class="tb-tab active" onclick="setTab(this)"><div class="tb-tab-dot" style="background:var(--orange);"></div>Feed</div>
+      <div class="tb-tab" onclick="setTab(this)"><div class="tb-tab-dot" style="background:var(--pink);"></div>Campfires</div>
+      <div class="tb-tab" onclick="setTab(this)"><div class="tb-tab-dot" style="background:var(--blue);"></div>Plans</div>
+      <div class="tb-tab" onclick="setTab(this)"><div class="tb-tab-dot" style="background:var(--purple);"></div>Circles</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-right-item">
+        <span style="opacity:0.4;">No likes · No followers · No algorithm</span>
+      </div>
+      <div class="tb-right-item highlight">
+        <div class="tb-depth">
+          <div class="td-label">Depth score</div>
+          <div class="td-score">7.2</div>
+          <div class="td-bar"><div class="td-fill" style="width:72%;"></div></div>
+        </div>
+      </div>
+      <div class="tb-right-item">
+        <div class="tb-avatar">A</div>
+        <span style="opacity:0.6;">Alex</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+      <div class="lp-profile">
+        <div class="lp-prof-row">
+          <div class="lp-avatar">A</div>
+          <div>
+            <div class="lp-name">Alex</div>
+            <div class="lp-handle">@alex · BackRoad</div>
+          </div>
+        </div>
+        <div class="lp-no-metrics">
+          No follower count. No like count.<br>
+          Your worth isn't a number here.
+        </div>
+      </div>
+
+      <div class="lp-section">
+        <div class="lp-section-label">&#x1F525; Active Campfires</div>
+      </div>
+      <div class="campfire-list">
+        <div class="cf-item active">
+          <div class="cf-fire">&#x1F525;</div>
+          <div class="cf-info">
+            <div class="cf-name">Late Night Builders</div>
+            <div class="cf-meta">12 people · 8h left</div>
+          </div>
+          <div class="cf-live"></div>
+        </div>
+        <div class="cf-item" onclick="selectCampfire(this)">
+          <div class="cf-fire">&#x1F525;</div>
+          <div class="cf-info">
+            <div class="cf-name">AI Ethics Discussion</div>
+            <div class="cf-meta">7 people · 4h left</div>
+          </div>
+          <div class="cf-time">4h</div>
+        </div>
+        <div class="cf-item" onclick="selectCampfire(this)">
+          <div class="cf-fire">&#x1F319;</div>
+          <div class="cf-info">
+            <div class="cf-name">Sunday Reading Circle</div>
+            <div class="cf-meta">Opens Sunday · recurring</div>
+          </div>
+          <div class="cf-time">2d</div>
+        </div>
+      </div>
+
+      <div class="lp-section" style="border-top:1px solid var(--b);">
+        <div class="lp-section-label">&#x1F4C5; Plans</div>
+      </div>
+      <div class="plans-list">
+        <div class="plan-item">
+          <div class="plan-icon">&#x2615;</div>
+          <div class="plan-info">
+            <div class="plan-name">Coffee Thursday?</div>
+            <div class="plan-meta">Proposed by Maya · 4 interested</div>
+          </div>
+          <div class="plan-pill rsvp">RSVP'd</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-icon">&#x1F3B5;</div>
+          <div class="plan-info">
+            <div class="plan-name">Show on Friday</div>
+            <div class="plan-meta">Jordan's invite · 8pm</div>
+          </div>
+          <div class="plan-pill maybe">MAYBE</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-icon">&#x1F9D1;&#x200D;&#x1F4BB;</div>
+          <div class="plan-info">
+            <div class="plan-name">Hackathon weekend</div>
+            <div class="plan-meta">Sam proposed · March 15</div>
+          </div>
+          <div class="plan-pill new">NEW</div>
+        </div>
+      </div>
+
+      <div class="lp-section" style="border-top:1px solid var(--b);">
+        <div class="lp-section-label">&#x1F465; Circles</div>
+      </div>
+      <div class="lp-scroll">
+        <div class="connection-item">
+          <div class="conn-avatar" style="border-color:var(--orange);">M</div>
+          <div class="conn-dot" style="background:var(--orange);"></div>
+          <div class="conn-name">Maya</div>
+          <div class="conn-depth">depth 8.4</div>
+        </div>
+        <div class="connection-item">
+          <div class="conn-avatar" style="border-color:var(--purple);">J</div>
+          <div class="conn-dot" style="background:var(--purple);"></div>
+          <div class="conn-name">Jordan</div>
+          <div class="conn-depth">depth 6.1</div>
+        </div>
+        <div class="connection-item">
+          <div class="conn-avatar" style="border-color:var(--blue);">S</div>
+          <div class="conn-dot" style="background:var(--blue);"></div>
+          <div class="conn-name">Sam</div>
+          <div class="conn-depth">depth 5.8</div>
+        </div>
+        <div class="connection-item">
+          <div class="conn-avatar" style="border-color:rgba(255,255,255,0.2);">R</div>
+          <div class="conn-dot" style="background:rgba(255,255,255,0.15);"></div>
+          <div class="conn-name">Riley</div>
+          <div class="conn-depth">depth 3.2</div>
+        </div>
+        <div class="connection-item">
+          <div class="conn-avatar" style="border-color:var(--pink);">C</div>
+          <div class="conn-dot" style="background:var(--pink);"></div>
+          <div class="conn-name">Casey</div>
+          <div class="conn-depth">depth 7.7</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN: Feed -->
+    <div class="feed-wrap">
+      <div class="feed-header">
+        <div class="fh-title">Late Night Builders &#x1F525;</div>
+        <div class="fh-delay-notice">
+          <span>3h delay on · posts wait before publishing</span>
+          <div class="fh-clock" id="delay-clock">02:41</div>
+        </div>
+        <div class="fh-sort">
+          <button class="sort-btn active" onclick="setSortActive(this)">Depth</button>
+          <button class="sort-btn" onclick="setSortActive(this)">Recent</button>
+        </div>
+      </div>
+
+      <!-- Compose -->
+      <div class="compose-box">
+        <div class="compose-inner">
+          <textarea class="compose-ta" placeholder="What's on your mind? No one will see the count." id="compose-ta" rows="3"></textarea>
+          <div class="compose-footer">
+            <div class="compose-delay">
+              <span>Delay:</span>
+              <div class="cd-toggle">
+                <div class="cd-opt on" id="delay-on" onclick="toggleDelay(true)">3h</div>
+                <div class="cd-opt" id="delay-off" onclick="toggleDelay(false)">Now</div>
+              </div>
+              <span id="delay-note" style="opacity:0.6;">· prevents reactive posting</span>
+            </div>
+            <button class="compose-post" onclick="submitPost()">Post →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Campfire banner -->
+      <div class="campfire-banner">
+        <div class="cb-head">
+          <div class="cb-fire">&#x1F525;</div>
+          <div>
+            <div class="cb-name">Late Night Builders</div>
+            <div style="font-size:0.42rem;opacity:0.3;margin-top:2px;">Campfire · temporary 12h gathering</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="cb-timer" id="cf-timer">08:14:33</div>
+            <div class="cb-timer-label">time remaining</div>
+          </div>
+        </div>
+        <div class="cb-desc">A space for people building things at odd hours. No topic constraints. Disappears when the timer hits zero — everything said here stays here.</div>
+        <div style="display:flex;align-items:center;gap:0;">
+          <div class="cb-members">
+            <div class="cb-av" style="background:rgba(255,132,0,0.2);border-color:var(--orange);color:var(--orange);">M</div>
+            <div class="cb-av" style="background:rgba(136,0,255,0.2);border-color:var(--purple);color:var(--purple);">J</div>
+            <div class="cb-av" style="background:rgba(0,102,255,0.2);border-color:var(--blue);color:var(--blue);">S</div>
+            <div class="cb-av" style="background:rgba(255,0,102,0.2);border-color:var(--pink);color:var(--pink);">C</div>
+            <div class="cb-av" style="background:rgba(255,255,255,0.05);">R</div>
+          </div>
+          <div class="cb-count">12 gathered</div>
+          <button class="cb-join">You're inside ✓</button>
+        </div>
+      </div>
+
+      <!-- Feed scroll -->
+      <div class="feed-scroll" id="feed-scroll">
+
+        <!-- Post 1 -->
+        <div class="post-card selected" onclick="selectPost(this,0)">
+          <div class="pc-head">
+            <div class="pc-avatar" style="border-color:var(--orange);color:var(--orange);">M</div>
+            <div class="pc-meta">
+              <div class="pc-name">Maya</div>
+              <div class="pc-time">
+                posted 2h ago
+                <div class="pc-delayed">3H DELAY</div>
+              </div>
+            </div>
+            <div class="pc-depth-badge">
+              <div class="pdb-label">depth</div>
+              <div class="pdb-score">9.1</div>
+            </div>
+          </div>
+          <div class="depth-bar"><div class="depth-fill" style="width:91%;background:var(--orange);"></div></div>
+          <div class="pc-body">
+            I keep thinking about how we've confused <strong>connection</strong> with <strong>reach</strong>. We built platforms that optimized for the number of people who would see you — and somehow convinced ourselves that was the same thing as being heard.<br><br>
+            It's not. Being heard by one person who actually thinks about what you said is worth more than 10,000 impressions of nothing.
+          </div>
+          <div class="pc-footer">
+            <div class="pc-tag">reflection</div>
+            <div class="pc-tag">connection</div>
+            <div class="pc-reply-count">
+              <span>&#x21A9;</span> 4 replies
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 2 -->
+        <div class="post-card" onclick="selectPost(this,1)">
+          <div class="pc-head">
+            <div class="pc-avatar" style="border-color:var(--purple);color:var(--purple);">J</div>
+            <div class="pc-meta">
+              <div class="pc-name">Jordan</div>
+              <div class="pc-time">posted 3h ago</div>
+            </div>
+            <div class="pc-depth-badge">
+              <div class="pdb-label">depth</div>
+              <div class="pdb-score">7.4</div>
+            </div>
+          </div>
+          <div class="depth-bar"><div class="depth-fill" style="width:74%;background:var(--purple);"></div></div>
+          <div class="pc-body">
+            Shipped the backend auth flow tonight. Magic links feel right for this — no password anxiety, no "forgot password" spiral. Just a link, you're in, done.<br><br>
+            The 3-hour delay on posts is genuinely changing how I write. I catch about half my reactive thoughts before they go out. It's uncomfortable in a good way.
+          </div>
+          <div class="pc-footer">
+            <div class="pc-tag">building</div>
+            <div class="pc-tag">auth</div>
+            <div class="pc-reply-count"><span>&#x21A9;</span> 2 replies</div>
+          </div>
+        </div>
+
+        <!-- Post 3 -->
+        <div class="post-card" onclick="selectPost(this,2)">
+          <div class="pc-head">
+            <div class="pc-avatar" style="border-color:var(--pink);color:var(--pink);">C</div>
+            <div class="pc-meta">
+              <div class="pc-name">Casey</div>
+              <div class="pc-time">
+                posted 5h ago
+                <div class="pc-delayed">3H DELAY</div>
+              </div>
+            </div>
+            <div class="pc-depth-badge">
+              <div class="pdb-label">depth</div>
+              <div class="pdb-score">8.8</div>
+            </div>
+          </div>
+          <div class="depth-bar"><div class="depth-fill" style="width:88%;background:var(--pink);"></div></div>
+          <div class="pc-body">
+            Read something this week that said the algorithm doesn't reward content that makes you think — it rewards content that makes you feel. Because feeling is faster, and fast means more scrolls per minute.<br><br>
+            I want a place that's slow on purpose. Not slower in a bad way. Slower like a conversation instead of a broadcast.
+          </div>
+          <div class="pc-footer">
+            <div class="pc-tag">slowness</div>
+            <div class="pc-tag">attention</div>
+            <div class="pc-reply-count"><span>&#x21A9;</span> 6 replies</div>
+          </div>
+        </div>
+
+        <!-- Post 4 -->
+        <div class="post-card" onclick="selectPost(this,3)">
+          <div class="pc-head">
+            <div class="pc-avatar" style="border-color:var(--blue);color:var(--blue);">S</div>
+            <div class="pc-meta">
+              <div class="pc-name">Sam</div>
+              <div class="pc-time">posted 6h ago</div>
+            </div>
+            <div class="pc-depth-badge">
+              <div class="pdb-label">depth</div>
+              <div class="pdb-score">6.3</div>
+            </div>
+          </div>
+          <div class="depth-bar"><div class="depth-fill" style="width:63%;background:var(--blue);"></div></div>
+          <div class="pc-body">
+            Got the hackathon proposal up. March 15th weekend — who's in? No theme, just build something you've been sitting on. Real project, real output. I'll host.<br><br>
+            Reply here or RSVP in Plans if you want a spot. Keeping it small — max 8 people.
+          </div>
+          <div class="pc-footer">
+            <div class="pc-tag">hackathon</div>
+            <div class="pc-tag">build</div>
+            <div class="pc-reply-count"><span>&#x21A9;</span> 3 replies</div>
+          </div>
+        </div>
+
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Depth + Thread -->
+    <div class="right-panel">
+      <div class="rp-head">
+        <div class="rp-accent"></div>
+        <div class="rp-title">Conversation Depth</div>
+        <div class="rp-badge">9.1 / 10</div>
+      </div>
+
+      <div class="depth-meter">
+        <div class="dm-label">What depth measures</div>
+        <div class="dm-rings">
+          <div class="dm-ring" style="width:80px;height:80px;border-color:rgba(255,132,0,0.1);"></div>
+          <div class="dm-ring" style="width:60px;height:60px;border-color:rgba(255,132,0,0.2);"></div>
+          <div class="dm-ring" style="width:40px;height:40px;border-color:rgba(255,132,0,0.4);"></div>
+          <div class="dm-score-center" id="depth-display">9.1</div>
+        </div>
+        <div class="dm-score-label" id="depth-label">Very high depth · Meaningful</div>
+        <div class="dm-breakdown">
+          <div class="dmb-row">
+            <div class="dmb-label">Idea density</div>
+            <div class="dmb-bar-wrap"><div class="dmb-bar" id="bar-idea" style="width:92%;"></div></div>
+            <div class="dmb-val" id="val-idea">92%</div>
+          </div>
+          <div class="dmb-row">
+            <div class="dmb-label">Response quality</div>
+            <div class="dmb-bar-wrap"><div class="dmb-bar" id="bar-resp" style="width:88%;"></div></div>
+            <div class="dmb-val" id="val-resp">88%</div>
+          </div>
+          <div class="dmb-row">
+            <div class="dmb-label">Conversation length</div>
+            <div class="dmb-bar-wrap"><div class="dmb-bar" id="bar-len" style="width:78%;"></div></div>
+            <div class="dmb-val" id="val-len">78%</div>
+          </div>
+          <div class="dmb-row">
+            <div class="dmb-label">Follow-through</div>
+            <div class="dmb-bar-wrap"><div class="dmb-bar" id="bar-fol" style="width:95%;"></div></div>
+            <div class="dmb-val" id="val-fol">95%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-metrics-badge">
+        <div class="nmb-inner">
+          <div class="nmb-dot"></div>
+          <div class="nmb-text">Depth score replaces likes, views, and follower counts. It measures conversation quality — not audience size. It's private to you.</div>
+        </div>
+      </div>
+
+      <div class="thread-view" id="thread-view">
+        <!-- Thread populated by JS -->
+      </div>
+
+      <div class="rp-reply">
+        <textarea class="rp-reply-inp" id="reply-inp" placeholder="Reply thoughtfully..." rows="2"></textarea>
+        <button class="rp-send" onclick="submitReply()">→</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ── POST DATA ── */
+  const POSTS = [
+    {
+      depth:9.1, idea:92, resp:88, len:78, fol:95,
+      label:'Very high depth · Meaningful',
+      thread:[
+        { name:'Jordan', color:'#8800FF', time:'1h ago', text:'The reach vs. connection thing is something I\'ve been sitting with. I think we also confused virality with value. If something spreads fast it must be good — but often it just means it triggered something, not that it landed.' },
+        { name:'Sam',    color:'#0066FF', time:'58m ago', text:'Replying to Jordan — yes, and the feedback loop is the worst part. You start writing for the spread and stop writing for the person. The audience becomes abstract. The individual disappears.', indent:true },
+        { name:'Casey',  color:'#FF0066', time:'45m ago', text:'I think the hardest thing to unlearn is checking. Like, the compulsive loop. You post and then you check. And check. Removing the number removes the loop. I genuinely hadn\'t noticed how much of my attention it was eating.' },
+        { name:'Maya',   color:'#FF8400', time:'32m ago', text:'Exactly this. The number is the hook. You don\'t need someone to build you a slot machine if you\'re checking a like counter every ten minutes.' },
+      ]
+    },
+    {
+      depth:7.4, idea:75, resp:70, len:68, fol:82,
+      label:'High depth · Solid conversation',
+      thread:[
+        { name:'Maya',  color:'#FF8400', time:'2h ago', text:'Magic links are genuinely underrated. The "forgot password" flow is such a dark pattern — it presupposes failure. Starting from email-as-identity instead is so much cleaner.' },
+        { name:'Casey', color:'#FF0066', time:'90m ago', text:'The delay changing how you write is real. I had the same experience. There\'s something about knowing it has to sit that makes you edit harder.', indent:false },
+      ]
+    },
+    {
+      depth:8.8, idea:90, resp:85, len:82, fol:88,
+      label:'Very high depth · Thoughtful',
+      thread:[
+        { name:'Jordan', color:'#8800FF', time:'4h ago', text:'The feeling vs thinking thing is something researchers have been documenting for years. Outrage travels 6x faster than awe on most platforms. The incentive is to make people angry, not curious.' },
+        { name:'Sam',    color:'#0066FF', time:'3h ago', text:'Slow on purpose is exactly what I want too. I keep telling people the 3h delay sounds annoying but it\'s actually the feature. It breaks the reactive loop entirely.' },
+        { name:'Maya',   color:'#FF8400', time:'3h ago', text:'There\'s something in this about how we\'ve conflated real-time with authentic. Like, a thought you had five seconds ago and typed in a rage is somehow more "real" than something you considered for an hour.', indent:false },
+        { name:'Casey',  color:'#FF0066', time:'2h ago', text:'Replying to Maya — exactly. Immediacy as authenticity is a myth the platforms invented because it served their engagement numbers.', indent:true },
+        { name:'Alex',   color:'rgba(255,255,255,0.5)', time:'2h ago', text:'All of this. The delay is doing something deeper — it\'s re-introducing friction in the right place. Friction at the point of impulse, not friction when you\'re trying to find something or build something.' },
+      ]
+    },
+    {
+      depth:6.3, idea:62, resp:60, len:55, fol:70,
+      label:'Good depth · Growing',
+      thread:[
+        { name:'Jordan', color:'#8800FF', time:'5h ago', text:'I\'m in for the hackathon. What\'s the hosting situation — do you have space or are we finding somewhere?' },
+        { name:'Casey',  color:'#FF0066', time:'5h ago', text:'Also in. I\'ve been sitting on a project for months and this is exactly the push I need.' },
+        { name:'Sam',    color:'#0066FF', time:'4h ago', text:'I\'ve got space at mine. Kitchen table hackathon. I\'ll make it work for 8.', indent:false },
+      ]
+    },
+  ];
+
+  let activePost = 0;
+
+  function renderThread(idx) {
+    const p = POSTS[idx];
+    const tv = document.getElementById('thread-view');
+    tv.innerHTML = p.thread.map(t => `
+      <div class="thread-post${t.indent ? ' tp-indent' : ''}">
+        <div class="tp-head">
+          <div class="tp-av" style="border-color:${t.color};color:${t.color};">${t.name[0]}</div>
+          <div class="tp-name">${t.name}</div>
+          <div class="tp-time">${t.time}</div>
+        </div>
+        <div class="tp-body">${t.text}</div>
+      </div>
+    `).join('');
+
+    // Update depth meter
+    document.getElementById('depth-display').textContent = p.depth;
+    document.getElementById('depth-label').textContent   = p.label;
+    document.getElementById('bar-idea').style.width = p.idea+'%';
+    document.getElementById('val-idea').textContent = p.idea+'%';
+    document.getElementById('bar-resp').style.width = p.resp+'%';
+    document.getElementById('val-resp').textContent = p.resp+'%';
+    document.getElementById('bar-len').style.width  = p.len+'%';
+    document.getElementById('val-len').textContent  = p.len+'%';
+    document.getElementById('bar-fol').style.width  = p.fol+'%';
+    document.getElementById('val-fol').textContent  = p.fol+'%';
+
+    // Badge
+    document.querySelector('.rp-badge').textContent = p.depth + ' / 10';
+  }
+
+  function selectPost(el, idx) {
+    document.querySelectorAll('.post-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    activePost = idx;
+    renderThread(idx);
+  }
+
+  /* ── REPLY ── */
+  function submitReply() {
+    const inp = document.getElementById('reply-inp');
+    const val = inp.value.trim();
+    if (!val) return;
+    inp.value = '';
+    const tv = document.getElementById('thread-view');
+    const div = document.createElement('div');
+    div.className = 'thread-post';
+    div.style.cssText = 'animation:fadeUp 0.3s ease;border-left:2px solid rgba(255,132,0,0.3);';
+    div.innerHTML = `
+      <div class="tp-head">
+        <div class="tp-av" style="border-color:var(--orange);color:var(--orange);">A</div>
+        <div class="tp-name">Alex</div>
+        <div class="tp-time">just now</div>
+      </div>
+      <div class="tp-body">${val}</div>
+    `;
+    tv.appendChild(div);
+    tv.scrollTop = tv.scrollHeight;
+  }
+  document.getElementById('reply-inp').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitReply(); }
+  });
+
+  /* ── COMPOSE ── */
+  let delayOn = true;
+  function toggleDelay(on) {
+    delayOn = on;
+    document.getElementById('delay-on').className  = 'cd-opt' + (on  ? ' on' : '');
+    document.getElementById('delay-off').className = 'cd-opt' + (!on ? ' on' : '');
+    document.getElementById('delay-note').style.opacity = on ? '0.6' : '0.2';
+    document.getElementById('delay-note').textContent   = on ? '· prevents reactive posting' : '· posting immediately';
+  }
+
+  function submitPost() {
+    const ta = document.getElementById('compose-ta');
+    const val = ta.value.trim();
+    if (!val) return;
+    ta.value = '';
+
+    const feed = document.getElementById('feed-scroll');
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.style.cssText = 'animation:fadeUp 0.35s ease;border-left:2px solid rgba(255,132,0,0.4);';
+    const depthScore = (5 + Math.random()*3).toFixed(1);
+    card.innerHTML = `
+      <div class="pc-head">
+        <div class="pc-avatar" style="border-color:var(--orange);color:var(--orange);">A</div>
+        <div class="pc-meta">
+          <div class="pc-name">Alex</div>
+          <div class="pc-time">
+            ${delayOn ? 'queued · posts in 3h' : 'just now'}
+            ${delayOn ? '<div class="pc-delayed">3H DELAY</div>' : ''}
+          </div>
+        </div>
+        <div class="pc-depth-badge"><div class="pdb-label">depth</div><div class="pdb-score">—</div></div>
+      </div>
+      <div class="depth-bar"><div class="depth-fill" style="width:0%;background:var(--orange);transition:width 2s;"></div></div>
+      <div class="pc-body">${val}</div>
+      <div class="pc-footer">
+        <div class="pc-tag">${delayOn ? 'queued' : 'posted'}</div>
+        <div class="pc-reply-count">&#x21A9; 0 replies</div>
+      </div>
+    `;
+    // Insert after campfire banner
+    const banner = document.querySelector('.campfire-banner');
+    banner.insertAdjacentElement('afterend', card);
+    setTimeout(() => {
+      const fill = card.querySelector('.depth-fill');
+      if (fill) fill.style.width = '20%';
+    }, 100);
+  }
+
+  /* ── CAMPFIRE TIMER ── */
+  let cfSeconds = 8 * 3600 + 14 * 60 + 33;
+  setInterval(() => {
+    if (cfSeconds > 0) cfSeconds--;
+    const h = Math.floor(cfSeconds / 3600);
+    const m = Math.floor((cfSeconds % 3600) / 60);
+    const s = cfSeconds % 60;
+    const pad = v => v.toString().padStart(2,'0');
+    const el = document.getElementById('cf-timer');
+    if (el) el.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }, 1000);
+
+  /* ── DELAY CLOCK ── */
+  let dlSec = 2 * 3600 + 41 * 60;
+  setInterval(() => {
+    if (dlSec > 0) dlSec--;
+    const h = Math.floor(dlSec / 3600);
+    const m = Math.floor((dlSec % 3600) / 60);
+    const pad = v => v.toString().padStart(2,'0');
+    const el = document.getElementById('delay-clock');
+    if (el) el.textContent = `${pad(h)}:${pad(m)}`;
+  }, 1000);
+
+  /* ── TABS & UTILS ── */
+  function setTab(el) {
+    document.querySelectorAll('.tb-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function setSortActive(el) {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function selectCampfire(el) {
+    document.querySelectorAll('.cf-item').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Init
+  renderThread(0);
+</script>
+
+</body>
+</html>
