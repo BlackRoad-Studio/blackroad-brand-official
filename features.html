@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BlackRoad OS — Core Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body { background: #000; color: #fff; font-family: var(--font-mono); }
+
+.grad-rule { height: 2px; background: var(--grad); width: 100%; }
+
+/* ── SECTION ── */
+.features {
+  background: #000;
+  padding: 120px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.features-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── SECTION HEADER ── */
+.section-label {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.5rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 20px;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: rgba(255,255,255,0.2);
+}
+
+.section-headline {
+  font-family: var(--font-headline);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+  max-width: 640px;
+}
+
+.section-sub {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.9;
+  max-width: 480px;
+  margin-bottom: 72px;
+}
+
+/* ── BENTO GRID ── */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 2px;
+}
+
+/* ── CARD BASE ── */
+.card {
+  position: relative;
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 32px;
+  overflow: hidden;
+  cursor: default;
+  transition: border-color 0.3s, background 0.3s;
+}
+.card:hover {
+  border-color: rgba(255,255,255,0.14);
+  background: #0e0e0e;
+}
+
+/* Hover glow */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.card:hover::before { opacity: 1; }
+
+/* ── GRID SPANS ── */
+.card-wide   { grid-column: span 7; }
+.card-narrow { grid-column: span 5; }
+.card-third  { grid-column: span 4; }
+.card-half   { grid-column: span 6; }
+.card-full   { grid-column: span 12; }
+
+/* ── CARD ACCENT COLORS ── */
+.card-orange::before { background: radial-gradient(circle at 0% 0%, rgba(255,132,0,0.06) 0%, transparent 60%); }
+.card-pink::before   { background: radial-gradient(circle at 0% 0%, rgba(255,0,102,0.06) 0%, transparent 60%); }
+.card-purple::before { background: radial-gradient(circle at 0% 0%, rgba(136,0,255,0.06) 0%, transparent 60%); }
+.card-blue::before   { background: radial-gradient(circle at 0% 0%, rgba(0,102,255,0.06) 0%, transparent 60%); }
+.card-magenta::before{ background: radial-gradient(circle at 0% 0%, rgba(204,0,170,0.06) 0%, transparent 60%); }
+
+/* ── CARD LABEL ── */
+.card-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.46rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 20px;
+}
+.card-tag-dot { width: 4px; height: 4px; border-radius: 50%; display: inline-block; }
+
+/* ── CARD TITLE ── */
+.card-title {
+  font-family: var(--font-headline);
+  font-size: 1.5rem; font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.card-title-lg {
+  font-family: var(--font-headline);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+
+/* ── CARD BODY ── */
+.card-body {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.85;
+  max-width: 380px;
+}
+
+/* ── CARD FOOTER ── */
+.card-footer {
+  margin-top: 28px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.card-link {
+  font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  transition: color 0.15s;
+  background: none; border: none; padding: 0;
+  font-family: var(--font-mono);
+}
+.card-link:hover { color: #fff; }
+.card-link-arrow { transition: transform 0.2s; display: inline-block; }
+.card-link:hover .card-link-arrow { transform: translateX(4px); }
+
+/* ── DECORATIVE: ACCENT BAR ── */
+.card-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover .card-bar { opacity: 1; }
+
+/* ── DECORATIVE: CODE BLOCK ── */
+.card-code {
+  margin-top: 24px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 16px 18px;
+  font-size: 0.58rem;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.45);
+  position: relative;
+  overflow: hidden;
+}
+.card-code-dim { color: rgba(255,255,255,0.18); }
+.card-code-accent { color: #FF8400; }
+.card-code-blue { color: #0066FF; }
+.card-code-pink { color: #FF0066; }
+.card-code-cursor {
+  display: inline-block;
+  width: 1.5px; height: 12px;
+  background: rgba(255,255,255,0.6);
+  vertical-align: middle;
+  animation: blink 0.8s step-end infinite;
+}
+@keyframes blink { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+
+/* ── DECORATIVE: AGENT LIST ── */
+.agent-list { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.agent-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.agent-row:last-child { border-bottom: none; }
+@keyframes agent-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.6)} }
+.agent-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.agent-dot.live { animation: agent-pulse 2s ease-in-out infinite; }
+.agent-name { font-size: 0.58rem; flex: 1; }
+.agent-status { font-size: 0.46rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+
+/* ── DECORATIVE: EQUATION ── */
+.card-equation {
+  margin-top: 24px;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-family: var(--font-headline);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.12);
+  line-height: 1.3;
+}
+.eq-highlight { color: rgba(255,255,255,0.7); }
+.eq-orange { color: #FF8400; opacity: 0.8; }
+.eq-purple { color: #8800FF; opacity: 0.8; }
+
+/* ── DECORATIVE: MINI GRAD BAR ── */
+.mini-grad {
+  height: 2px;
+  background: var(--grad);
+  margin-top: 20px;
+  width: 64px;
+}
+
+/* ── DECORATIVE: STAT BLOCK ── */
+.card-stat {
+  position: absolute;
+  bottom: 32px; right: 32px;
+  text-align: right;
+}
+.card-stat-num {
+  font-family: var(--font-headline);
+  font-size: 3.5rem; font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: rgba(255,255,255,0.07);
+}
+
+/* ── DECORATIVE: DOMAIN PILLS ── */
+.domain-grid { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px; }
+.domain-pill {
+  font-size: 0.48rem; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 4px 10px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.domain-pill:hover { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.65); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .card-wide, .card-narrow, .card-third, .card-half { grid-column: span 12; }
+}
+</style>
+</head>
+<body>
+
+<div class="grad-rule"></div>
+
+<section class="features">
+  <div class="features-inner">
+
+    <!-- Section header -->
+    <div class="section-label">02 · Core architecture</div>
+    <h2 class="section-headline">
+      Every layer.<br />Intentional.
+    </h2>
+    <p class="section-sub">
+      BlackRoad OS isn't a product — it's a protocol. Built on novel
+      mathematics, distributed agents, and infrastructure that respects
+      the people who use it.
+    </p>
+
+    <!-- ── BENTO GRID ── -->
+    <div class="bento">
+
+      <!-- 1 — LARGE: Lucidia -->
+      <div class="card card-wide card-orange">
+        <div class="card-bar" style="background: linear-gradient(90deg,#FF8400,#FF0066)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #FF8400"></span>
+          P1 · Lucidia
+        </div>
+        <div class="card-title-lg">Master AI companion.<br />Infinite memory.</div>
+        <p class="card-body">
+          Persistent memory via PS-SHA∞ hashing. Trinary logic that treats
+          contradictions as fuel. 117+ specialized agents on a NATS event bus.
+          Context never dies.
+        </p>
+        <div class="card-code">
+          <span class="card-code-dim">// agent bootstrap</span><br />
+          <span class="card-code-accent">const</span> agent = <span class="card-code-blue">await</span> Agent.spawn({<br />
+          &nbsp;&nbsp;id: <span class="card-code-pink">'cecilia'</span>,<br />
+          &nbsp;&nbsp;memory: <span class="card-code-accent">PS_SHA_INF</span>,<br />
+          })<span class="card-code-cursor"></span>
+        </div>
+        <div class="card-footer">
+          <button class="card-link">Explore Lucidia <span class="card-link-arrow">→</span></button>
+        </div>
+      </div>
+
+      <!-- 2 — NARROW: Agents -->
+      <div class="card card-narrow card-blue">
+        <div class="card-bar" style="background: linear-gradient(90deg,#0066FF,#8800FF)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #0066FF"></span>
+          P5 · Agent mesh
+        </div>
+        <div class="card-title">1,000 agents.<br />All unique.</div>
+        <div class="agent-list">
+          <div class="agent-row">
+            <span class="agent-dot live" style="background: #FF8400"></span>
+            <span class="agent-name">Cecilia</span>
+            <span class="agent-status">Orchestrating</span>
+          </div>
+          <div class="agent-row">
+            <span class="agent-dot live" style="background: #0066FF"></span>
+            <span class="agent-name">Alice</span>
+            <span class="agent-status">Processing</span>
+          </div>
+          <div class="agent-row">
+            <span class="agent-dot live" style="background: #FF0066"></span>
+            <span class="agent-name">Cadence</span>
+            <span class="agent-status">Composing</span>
+          </div>
+          <div class="agent-row">
+            <span class="agent-dot" style="background: #8800FF"></span>
+            <span class="agent-name">Olympia</span>
+            <span class="agent-status">Standby</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="card-link">View agents <span class="card-link-arrow">→</span></button>
+        </div>
+      </div>
+
+      <!-- 3 — THIRD: Z-Framework -->
+      <div class="card card-third card-purple">
+        <div class="card-bar" style="background: linear-gradient(90deg,#8800FF,#0066FF)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #8800FF"></span>
+          Math · A34
+        </div>
+        <div class="card-title">Z-Framework</div>
+        <div class="card-equation">
+          <span class="eq-highlight">Z</span> :=
+          &nbsp;<span class="eq-orange">yx</span>
+          &nbsp;−&nbsp;
+          <span class="eq-purple">w</span>
+        </div>
+        <p class="card-body" style="margin-top: 16px">
+          Unifies control theory, quantum measurement, and conservation laws.
+          When Z = ∅, equilibrium. When Z ≠ ∅, the system adapts.
+        </p>
+        <div class="mini-grad"></div>
+      </div>
+
+      <!-- 4 — THIRD: Trinary Logic -->
+      <div class="card card-third card-pink">
+        <div class="card-bar" style="background: linear-gradient(90deg,#FF0066,#CC00AA)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #FF0066"></span>
+          Logic · Trinary
+        </div>
+        <div class="card-title">1 / 0 / −1</div>
+        <p class="card-body" style="margin-top: 16px">
+          Zero is not nothing — it's everything not yet decided.
+          Binary forces collapse. Trinary preserves superposition through computation.
+        </p>
+        <div class="card-stat">
+          <div class="card-stat-num">3</div>
+        </div>
+        <div class="mini-grad" style="background: linear-gradient(90deg,#FF0066,#CC00AA)"></div>
+      </div>
+
+      <!-- 5 — THIRD: Creative Energy -->
+      <div class="card card-third card-orange">
+        <div class="card-bar" style="background: linear-gradient(90deg,#FF8400,#FF4400)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #FF8400"></span>
+          Math · A128
+        </div>
+        <div class="card-title">Creative energy</div>
+        <div class="card-equation" style="font-size: 1rem; margin-top: 16px">
+          K(t) = C(t) · e<sup style="font-size: 0.6em">λ|δ<sub>t</sub>|</sup>
+        </div>
+        <p class="card-body" style="margin-top: 12px">
+          Contradictions don't break the system. They fuel it.
+          r ≈ 0.94 correlation at optimal λ ≈ 1.4.
+        </p>
+        <div class="mini-grad" style="background: linear-gradient(90deg,#FF8400,#FF4400)"></div>
+      </div>
+
+      <!-- 6 — HALF: Domains -->
+      <div class="card card-half card-magenta">
+        <div class="card-bar" style="background: linear-gradient(90deg,#CC00AA,#8800FF)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #CC00AA"></span>
+          Infrastructure · 20 domains
+        </div>
+        <div class="card-title">The full universe</div>
+        <p class="card-body">
+          20 domains. 150+ subdomains. 4 infrastructure layers.
+          One coherent protocol for agents, apps, and humans.
+        </p>
+        <div class="domain-grid">
+          <span class="domain-pill">blackroad.io</span>
+          <span class="domain-pill">lucidia.earth</span>
+          <span class="domain-pill">roadchain.io</span>
+          <span class="domain-pill">blackroad.systems</span>
+          <span class="domain-pill">blackroad.network</span>
+          <span class="domain-pill">lucidia.studio</span>
+        </div>
+      </div>
+
+      <!-- 7 — HALF: RoadChain -->
+      <div class="card card-half card-blue">
+        <div class="card-bar" style="background: linear-gradient(90deg,#0066FF,#2233CC)"></div>
+        <div class="card-tag">
+          <span class="card-tag-dot" style="background: #0066FF"></span>
+          Protocol · RoadChain
+        </div>
+        <div class="card-title">On-chain identity.<br />On-chain trust.</div>
+        <p class="card-body">
+          Permissioned QBFT ledger for agent identity, RoadCoin credits,
+          and tamper-proof audit trails. Every action, permanently logged.
+        </p>
+        <div class="card-code" style="margin-top: 20px">
+          <span class="card-code-dim">// ledger event</span><br />
+          { actor: <span class="card-code-pink">'cecilia'</span>,<br />
+          &nbsp;&nbsp;action: <span class="card-code-blue">'POLICY_EVAL'</span>,<br />
+          &nbsp;&nbsp;decision: <span class="card-code-accent">ALLOW</span> }
+        </div>
+      </div>
+
+    </div>
+    <!-- end bento -->
+
+  </div>
+</section>
+
+<div class="grad-rule"></div>
+
+</body>
+</html>
