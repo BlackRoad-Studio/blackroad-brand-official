@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BlackRoad OS — The OS Built for Builders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body { background: #000; color: #fff; font-family: var(--font-mono); }
+
+/* ── GRAD RULE ── */
+.grad-rule { height: 2px; background: var(--grad); width: 100%; }
+
+/* ── HERO WRAPPER ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding: 120px 24px 80px;
+}
+
+/* ── GRID BACKGROUND ── */
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%);
+}
+
+/* ── GLOW ORBS ── */
+.hero-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); pointer-events: none;
+}
+.hero-orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(255,132,0,0.12) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation: orb-drift-1 12s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(136,0,255,0.1) 0%, transparent 70%);
+  bottom: -150px; right: -150px;
+  animation: orb-drift-2 15s ease-in-out infinite;
+}
+.hero-orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(255,0,102,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  animation: orb-drift-3 10s ease-in-out infinite;
+}
+
+@keyframes orb-drift-1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,30px)} }
+@keyframes orb-drift-2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,-40px)} }
+@keyframes orb-drift-3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.2)} }
+
+/* ── CONTENT ── */
+.hero-inner {
+  position: relative; z-index: 2;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+}
+
+/* ── EYEBROW ── */
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fade-up 0.6s ease 0.1s forwards;
+}
+.hero-eyebrow-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: #FF8400;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.8);opacity:0.6} }
+.hero-eyebrow-line { width: 32px; height: 1px; background: rgba(255,255,255,0.15); }
+
+/* ── HEADLINE ── */
+.hero-headline {
+  font-family: var(--font-headline);
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fade-up 0.7s ease 0.2s forwards;
+}
+
+.hero-headline-line2 {
+  display: block;
+  position: relative;
+}
+.hero-headline-line2::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 100%;
+  max-width: 480px;
+  background: var(--grad);
+  margin-top: 16px;
+  animation: grow-in 0.8s ease 0.7s both;
+}
+@keyframes grow-in { from{transform:scaleX(0);transform-origin:left} to{transform:scaleX(1);transform-origin:left} }
+
+/* ── SUB ── */
+.hero-sub {
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.42);
+  max-width: 520px;
+  margin-bottom: 48px;
+  opacity: 0;
+  animation: fade-up 0.7s ease 0.35s forwards;
+}
+
+/* ── ACTIONS ── */
+.hero-actions {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  opacity: 0;
+  animation: fade-up 0.7s ease 0.5s forwards;
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; border: none; padding: 12px 24px;
+  transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary { background: #fff; color: #000; }
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent; color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: #fff; transform: translateY(-1px); }
+
+.btn-arrow {
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.btn-primary:hover .btn-arrow,
+.btn-ghost:hover .btn-arrow { transform: translateX(3px); }
+
+/* ── STATS ROW ── */
+.hero-stats {
+  position: relative; z-index: 2;
+  max-width: 1200px; margin: 80px auto 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  opacity: 0;
+  animation: fade-up 0.7s ease 0.7s forwards;
+}
+
+.hero-stat {
+  padding: 0 32px 0 0;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.hero-stat:last-child { border-right: none; padding-right: 0; }
+.hero-stat:not(:first-child) { padding-left: 32px; }
+
+.stat-num {
+  font-family: var(--font-headline);
+  font-size: 2.4rem; font-weight: 700; line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-size: 0.48rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: rgba(255,255,255,0.28);
+}
+.stat-grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* ── SCROLL INDICATOR ── */
+.hero-scroll {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 0.44rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  z-index: 2;
+  animation: fade-in 1s ease 1.2s both;
+}
+.hero-scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
+
+/* ── ANIMATIONS ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in { from{opacity:0} to{opacity:1} }
+
+/* ── TICKER ── */
+.hero-ticker {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden; height: 36px;
+  display: flex; align-items: center;
+  z-index: 2;
+  background: rgba(0,0,0,0.4);
+}
+.hero-ticker-track {
+  display: flex; gap: 0;
+  animation: ticker 30s linear infinite;
+  white-space: nowrap;
+}
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.hero-ticker-item {
+  font-size: 0.46rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  padding: 0 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+.hero-ticker-dot { width: 3px; height: 3px; border-radius: 50%; background: #FF8400; opacity: 0.6; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .hero { padding: 100px 20px 100px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 32px 0; }
+  .hero-stat { border-right: none; padding: 0 0 24px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .hero-stat:nth-child(3), .hero-stat:nth-child(4) { border-bottom: none; }
+  .hero-scroll { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="grad-rule"></div>
+
+<section class="hero">
+  <!-- Background -->
+  <div class="hero-grid"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <!-- Content -->
+  <div class="hero-inner">
+
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      <span class="hero-eyebrow-line"></span>
+      BlackRoad OS · v1.0 · Now in development
+    </div>
+
+    <h1 class="hero-headline">
+      The OS built<br />
+      <span class="hero-headline-line2">for builders.</span>
+    </h1>
+
+    <p class="hero-sub">
+      A distributed AI operating system where 1,000 agents
+      remember everything, contradictions fuel creativity,
+      and the road home is always black.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn btn-primary">
+        Get early access <span class="btn-arrow">&rarr;</span>
+      </button>
+      <button class="btn btn-ghost">
+        Read the docs <span class="btn-arrow">&rarr;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="stat-num stat-grad" data-target="1000" data-suffix="K" data-display="1K">0</div>
+      <div class="stat-label">Unique agents</div>
+    </div>
+    <div class="hero-stat">
+      <div class="stat-num" data-target="20" data-suffix="" data-display="20">0</div>
+      <div class="stat-label">Domains deployed</div>
+    </div>
+    <div class="hero-stat">
+      <div class="stat-num" data-target="317" data-suffix="+" data-display="317+">0</div>
+      <div class="stat-label">Core equations</div>
+    </div>
+    <div class="hero-stat">
+      <div class="stat-num stat-grad" data-target="0" data-suffix="" data-display="&infin;">0</div>
+      <div class="stat-label">Memory persistence</div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    scroll
+  </div>
+
+  <!-- Ticker -->
+  <div class="hero-ticker">
+    <div class="hero-ticker-track">
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>1,000 Unique Agents</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Persistent Memory</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Z-Framework</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Trinary Logic</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>PS-SHA&infin; Hashing</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>K3s Orchestration</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>NATS Event Bus</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Unity Agent Homes</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>RoadChain Protocol</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>30B Users Target</div>
+      <!-- Duplicated for seamless loop -->
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>1,000 Unique Agents</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Persistent Memory</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Z-Framework</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Trinary Logic</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>PS-SHA&infin; Hashing</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>K3s Orchestration</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>NATS Event Bus</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>Unity Agent Homes</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>RoadChain Protocol</div>
+      <div class="hero-ticker-item"><span class="hero-ticker-dot"></span>30B Users Target</div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Animated stat counters
+(function () {
+  var DELAY = 700;
+  var DURATION = 1200;
+  var STEPS = 40;
+
+  function animateCounters() {
+    var els = document.querySelectorAll('.stat-num[data-target]');
+    els.forEach(function (el) {
+      var target = parseInt(el.getAttribute('data-target'), 10);
+      var suffix = el.getAttribute('data-suffix') || '';
+      var display = el.getAttribute('data-display') || '';
+
+      // For infinity symbol or zero target, just show the display value
+      if (!target) {
+        setTimeout(function () { el.innerHTML = display; }, DELAY);
+        return;
+      }
+
+      // For "1K" style: animate 0→1 then append K
+      var isK = display.indexOf('K') !== -1;
+      var animTarget = isK ? 1 : target;
+
+      setTimeout(function () {
+        var current = 0;
+        var step = animTarget / STEPS;
+        var iv = setInterval(function () {
+          current = Math.min(current + step, animTarget);
+          var rounded = Math.round(current);
+          el.textContent = rounded + (isK ? 'K' : '') + suffix;
+          if (current >= animTarget) clearInterval(iv);
+        }, DURATION / STEPS);
+      }, DELAY);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', animateCounters);
+  } else {
+    animateCounters();
+  }
+})();
+</script>
+
+</body>
+</html>
